@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "Model.h"
 #include "Sprite.h"
+#include "Player.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "DebugCamera.h"
@@ -46,6 +47,7 @@ private: // メンバ変数
 	Audio* audio_ = nullptr;
 	Sprite* sprite_ = nullptr;
 	Model* model_ = nullptr;
+	Player* player_ = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
 	uint32_t textureHandle_ = 0;
 	uint32_t soundDataHandle_ = 0;
