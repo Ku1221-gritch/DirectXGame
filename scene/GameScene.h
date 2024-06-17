@@ -9,6 +9,8 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "DebugCamera.h"
+#include<vector>
+#include "Function.h"
 
 /// <summary>
 /// ゲームシーン
@@ -20,6 +22,7 @@ public: // メンバ関数
 	/// コンストクラタ
 	/// </summary>
 	GameScene();
+
 
 	/// <summary>
 	/// デストラクタ
@@ -46,7 +49,7 @@ private: // メンバ変数
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 	Sprite* sprite_ = nullptr;
-	Model* model_ = nullptr;
+	Model* modelBlock_ = nullptr;
 	Player* player_ = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
 	uint32_t textureHandle_ = 0;
@@ -55,7 +58,8 @@ private: // メンバ変数
 	WorldTransform worldTransform_;
 	ViewProjection viewProjection_;
 	//ImGuiで値を入力する変数
-	float inputFloat3[3] = {0, 0, 0};
+	float inputFloat3[3] = {0.0f, 0.0f, 0.0f};
+	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>
