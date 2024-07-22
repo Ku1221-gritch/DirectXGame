@@ -10,8 +10,10 @@ GameScene::GameScene() {}
 GameScene::~GameScene() {
 	delete sprite_;
 	delete modelBlock_;
+	delete modelSkydome_;
 	delete debugCamera_;
-	delete player_;
+	delete modelPlayer_;
+	delete mapChipField_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			delete worldTransformBlock;
@@ -22,27 +24,6 @@ GameScene::~GameScene() {
 
 void GameScene::Initialize() {
 
-	// 要素数
-	const uint32_t kNumBlockVirtical = 10;
-	const uint32_t kNumBlockHorizontal = 20;
-	// ブロック1個分の横幅
-	const float kBlockHeight = 2.0f;
-	const float kBlockWidth = 2.0f;
-	// 要素数を変更する
-	worldTransformBlocks_.resize(kNumBlockVirtical);
-	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
-		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
-	}
-	// ブロックの生成
-	for (uint32_t y = 0; y < kNumBlockVirtical; ++y) {
-		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
-
-			worldTransformBlocks_[y][j] = new WorldTransform();
-			worldTransformBlocks_[y][j]->Initialize();
-			worldTransformBlocks_[y][j]->translation_.x = kBlockWidth * j;
-			worldTransformBlocks_[y][j]->translation_.y = kBlockHeight * y;
-		}
-	}
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
@@ -51,13 +32,29 @@ void GameScene::Initialize() {
 	// audio_->PlayWave(soundDataHandle_);
 	// voiceHandle_ = audio_->PlayWave(soundDataHandle_, true);
 	// sprite_ = Sprite::Create(textureHandle_, {100, 50});
+	//ブロック
 	modelBlock_ = Model::Create();
 	worldTransform_.Initialize();
 	viewProjection_.Initialize();
-	////自キャラの生成
-	// player_ = new Player();
-	////自キャラの初期化
-	// player_->Initialize(modelBlock_,textureHandle_,&viewProjection_);
+	//スカイドーム
+	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
+	skydome_ = new Skydome();
+	skydome_->Initialize(modelSkydome_);
+	//マップチップフィールド
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+	GenerateBlocks();
+	//ビュープロジェクションの初期化
+	viewProjection_.farZ = 200;
+	viewProjection_.Initialize();
+	// 自キャラの生成
+	modelPlayer_ = Model::CreateFromOBJ("player", true);
+	player_ = new Player();
+	//座標をマップチップ番号で指定
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
+	// 自キャラの初期化
+	player_->Initialize(modelPlayer_, &viewProjection_, playerPosition);
+	player_->SetMapChipField(mapChipField_);
 	// ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
 	debugCamera_ = new DebugCamera(1280, 720);
@@ -65,12 +62,25 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetVisible(true);
 	// 軸方向表示が参照するビュープロジェクションを指定する（アドレス渡し）
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
+	movableArea_ = {0.0f, 150.0f,0.0f, 100.0f};
+	//カメラコントローラの初期化
+	cameraController_ = new CameraController();
+	cameraController_->Initialize();
+	//追従対象をセット
+	cameraController_->SetTarget(player_);
+	//移動範囲の指定
+	cameraController_->SetMoveableArea(movableArea_);
+	// リセット（瞬間合わせ）
+	cameraController_->Reset();
 }
 
 void GameScene::Update() {
+	cameraController_->Update();
 	// ブロックの更新
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+			if (!worldTransformBlock)
+				continue;
 
 			worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_); // アフィン変換行列
 
@@ -80,7 +90,7 @@ void GameScene::Update() {
 	}
 
 	// 自キャラの更新
-	// player_->Update();
+	player_->Update();
 	////スプライトの今の座標を取得
 	// Vector2 position = sprite_->GetPosition();
 	////座標を｛2，1｝移動
@@ -93,10 +103,38 @@ void GameScene::Update() {
 	//	//音声停止
 	//	audio_->StopWave(voiceHandle_);
 	// }
-	// デバッグカメラの更新
-	debugCamera_->Update();
+	// カメラの処理
+	if (isDebugCameraActive_) {
+		// デバッグカメラの更新
+		debugCamera_->Update();
+		viewProjection_.matView = debugCamera_->GetViewProjection().matView; // デバッグカメラのビュー行列;
+		viewProjection_.matProjection = debugCamera_->GetViewProjection().matProjection; // デバッグカメラのプロジェクション行列;
+		// ビュープロジェクション行列の転送
+		viewProjection_.TransferMatrix();
+	} else {
+		viewProjection_.matView = cameraController_->GetViewProjection().matView;
+		viewProjection_.matProjection = cameraController_->GetViewProjection().matProjection;
+		viewProjection_.TransferMatrix();
+	}
+
+	#ifdef _DEBUG
+	if (input_->TriggerKey(DIK_Q)) {
+		if (isDebugCameraActive_ == true) {
+			isDebugCameraActive_ = false;
+		} else if (isDebugCameraActive_ == false) {
+			isDebugCameraActive_ = true;
+		}
+	}
+
+	skydome_->Update();
+
+
+
+	#endif // _DEBUG
+
 
 #ifdef DEBUG
+	//if (input_->TriggerKey())
 	// デバッグテキストの表示
 	ImGui::Begin("Debug1");
 	// float3入力ボックス
@@ -141,9 +179,16 @@ void GameScene::Draw() {
 	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+			if (!worldTransformBlock)
+				continue;
+
 			modelBlock_->Draw(*worldTransformBlock, viewProjection_);
 		}
 	}
+
+	skydome_->Draw(&viewProjection_);
+	player_->Draw();
+	//modelSkydome_->Draw(worldTransform_, viewProjection_);
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
@@ -162,4 +207,26 @@ void GameScene::Draw() {
 	Sprite::PostDraw();
 
 #pragma endregion
+}
+
+void GameScene::GenerateBlocks() {
+	// 要素数
+	uint32_t kNumBlockVirtical = mapChipField_->GetNumBlockVirtical();
+	uint32_t kNumBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
+	// 要素数を変更する
+	worldTransformBlocks_.resize(kNumBlockVirtical);
+	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
+		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
+	}
+	// ブロックの生成
+	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
+		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
+			if (mapChipField_->GetMapChipTypeByIndex(j,i) == MapChipType::kBlock) {
+				WorldTransform* worldTransform = new WorldTransform();
+				worldTransform->Initialize();
+				worldTransformBlocks_[i][j] = worldTransform;
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+			}
+		}
+	}
 }
