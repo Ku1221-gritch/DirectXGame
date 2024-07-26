@@ -2,17 +2,10 @@
 #define NOMINMAX
 #include "ViewProjection.h"
 #include "WorldTransform.h"
+#include "Rect.h"
 
 //前方宣言
 class Player;
-
-//矩形
-struct Rect {
-	float left = 0.0f;
-	float right = 1.0f;
-	float bottom = 0.0f;
-	float top = 1.0f;
-};
 
 class CameraController {
 public:

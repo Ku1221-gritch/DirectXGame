@@ -2,11 +2,18 @@
 #include<stdlib.h>
 #include <cstdint>
 #include <vector>
+#include<Rect.h>
 
 #pragma once
 enum class MapChipType {
 	kBlank, // 空白
 	kBlock, // ブロック
+};
+
+
+struct IndexSet {
+uint32_t xIndex;
+uint32_t yIndex;
 };
 
 struct MapChipData {
@@ -31,9 +38,14 @@ public:
 
 	void LoadMapChipCsv(const std::string& filePath);
 
+	Rect GetRectByIndex(uint32_t xIndex, uint32_t yIndex);
+
 	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
 
 	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
 
 	MapChipData mapChipData_;
+
+
+	IndexSet GetMapChipIndexSetByPosition(const Vector3& position);
 };

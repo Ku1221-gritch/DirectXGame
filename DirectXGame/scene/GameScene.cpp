@@ -48,7 +48,7 @@ void GameScene::Initialize() {
 	viewProjection_.farZ = 200;
 	viewProjection_.Initialize();
 	// 自キャラの生成
-	modelPlayer_ = Model::CreateFromOBJ("player", true);
+	modelPlayer_ = Model::CreateFromOBJ("player2", true);
 	player_ = new Player();
 	//座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
