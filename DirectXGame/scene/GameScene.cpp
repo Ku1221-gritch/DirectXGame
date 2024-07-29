@@ -102,7 +102,7 @@ void GameScene::Update() {
 	// if (input_->TriggerKey(DIK_SPACE)) {
 	//	//音声停止
 	//	audio_->StopWave(voiceHandle_);
-	// }
+	// 
 	// カメラの処理
 	if (isDebugCameraActive_) {
 		// デバッグカメラの更新
