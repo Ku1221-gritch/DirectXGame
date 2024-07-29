@@ -12,7 +12,7 @@ struct CollisionMapInfo
 	// 天井衝突フラグ
 	bool onCeiling_ = false;
 	// 着地フラグ
-	bool onLanding_ = true;
+	bool onLanding_ = false;
 	// 壁接触フラグ
 	bool onWallcontact = false;
 	Vector3 movement_;
@@ -73,14 +73,20 @@ public:
 
 	void MapCollisionDetectionUp(CollisionMapInfo& info);
 
-	//void MapCollisionDetectionDown(CollisionMapInfo& info);
+	void MapCollisionDetectionDown(CollisionMapInfo& info);
 
-	//void MapCollisionDetectionRight(CollisionMapInfo& info);
+	void MapCollisionDetectionRight(CollisionMapInfo& info);
 
-	//void MapCollisionDetectionLeft(CollisionMapInfo& info);
+	void MapCollisionDetectionLeft(CollisionMapInfo& info);
 
 	//判定結果を反映して移動させる
 	void MoveJudgmentResults(const CollisionMapInfo& info);
+
+	// 壁に接触している場合の処理
+	void WallContactProcess(const CollisionMapInfo& info);
+
+	//接地状態の切り替え処理
+	void GroundingStateSwitching(const CollisionMapInfo& info);
 
 	private:
 		//マップチップによるフィールド
@@ -95,11 +101,17 @@ public:
 
 		Vector3 velocity_ = {};
 
-		static inline const float kBlank = 0.9f;
+		static inline const float kBlank = 0.1f;
 
 		static inline const float kAcceleration = 0.1f;
 
 		static inline const float kLimitRunSpeed = 0.3f;
+
+		static inline const float kAttenuationLanding = 0.1f;
+
+		static inline const float kAdsorptionLanding = 0.2f;
+
+		static inline const float kAttenuationWall = 0.1f;
 
 		//キャラクターの当たり判定サイズ 
 	    static inline const float kWidth = 1.8f;
