@@ -6,6 +6,7 @@
 #include "Model.h"
 #include "Sprite.h"
 #include "Player.h"
+#include "Enemy.h"
 #include"Skydome.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
@@ -64,6 +65,9 @@ private: // メンバ変数
 	// プレイヤー
 	Model* modelPlayer_ = nullptr;
 	Player* player_ = nullptr;
+	//敵
+	Model* modelEnemy_ = nullptr;
+	Enemy* enemy_ = nullptr;
 	//カメラコントローラー
 	CameraController* cameraController_ = nullptr;
 	//デバッグカメラ

@@ -10,13 +10,9 @@
 #include "MapChipField.h"
 #include "imgui.h"
 
-Player::Player() {
+Player::Player() {}
 
-}
-
-Player::~Player() {
-
-}
+Player::~Player() {}
 
 void Player::Initialize(Model* model, ViewProjection* viewProjection, const Vector3& position) {
 	//引数の内容をメンバ変数に記録
@@ -34,8 +30,6 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection, const Vect
 void Player::Update() { 
 	//移動処理
 	MovementInput();
-
-	
 
 	//着地フラグ
 	bool landing = false;
@@ -200,14 +194,14 @@ void Player::MapCollisionDetectionUp(CollisionMapInfo& info)
 	bool hit = false;
 	//左上点の判定
 	IndexSet indexSet;
-	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop] + Vector3(0.2f, 0, 0));
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 	if (mapChipType == MapChipType::kBlock) {
 		hit = true;
 		
 	}
 	//右上点の判定
-	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightTop]);
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightTop] + Vector3(-0.2f, 0, 0));
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 	if (mapChipType == MapChipType::kBlock) {
 		hit = true;
@@ -231,8 +225,6 @@ void Player::MapCollisionDetectionUp(CollisionMapInfo& info)
 	}
 }
 
-
-
 void Player::MapCollisionDetectionDown(CollisionMapInfo& info) 
 {
 	// 移動後の4つの角の座標
@@ -252,13 +244,13 @@ void Player::MapCollisionDetectionDown(CollisionMapInfo& info)
 	bool hit = false;
 	// 左下点の判定
 	IndexSet indexSet;
-	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom] + Vector3(0.2f,0,0));
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 	if (mapChipType == MapChipType::kBlock) {
 		hit = true;
 	}
 	// 右下点の判定
-	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom]);
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom] + Vector3(-0.2f, 0, 0));
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 	if (mapChipType == MapChipType::kBlock) {
 		hit = true;

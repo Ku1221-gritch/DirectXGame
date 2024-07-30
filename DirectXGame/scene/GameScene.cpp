@@ -50,11 +50,18 @@ void GameScene::Initialize() {
 	// 自キャラの生成
 	modelPlayer_ = Model::CreateFromOBJ("player2", true);
 	player_ = new Player();
+	//敵キャラの生成
+	modelEnemy_ = Model::CreateFromOBJ("Enemy", true);
+	enemy_ = new Enemy();
 	//座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(12, 18);
 	// 自キャラの初期化
 	player_->Initialize(modelPlayer_, &viewProjection_, playerPosition);
 	player_->SetMapChipField(mapChipField_);
+	//敵キャラの初期化
+	enemy_->Initialize(modelEnemy_, &viewProjection_, enemyPosition);
+	enemy_->SetMapChipField(mapChipField_);
 	// ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
 	debugCamera_ = new DebugCamera(1280, 720);
@@ -91,6 +98,8 @@ void GameScene::Update() {
 
 	// 自キャラの更新
 	player_->Update();
+	//敵キャラの更新
+	enemy_->Update();
 	////スプライトの今の座標を取得
 	// Vector2 position = sprite_->GetPosition();
 	////座標を｛2，1｝移動
@@ -188,7 +197,7 @@ void GameScene::Draw() {
 
 	skydome_->Draw(&viewProjection_);
 	player_->Draw();
-	//modelSkydome_->Draw(worldTransform_, viewProjection_);
+	enemy_->Draw();
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
