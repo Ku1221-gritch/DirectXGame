@@ -3,8 +3,10 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "Model.h"
+#include "struct.h"
 
 class MapChipField;
+class Player;
 
 class Enemy 
 {
@@ -49,8 +51,16 @@ static inline const float kWalkMotionAngleEnd = 0.3f;
 static inline const float kWalkMotionTime = 0.3f;
 //経過時間
 float walkTimer_ = 0.0f;
+
 //速度
 Vector3 velocity_ = {};
+
+// ワールド座標を取得
+Vector3 GetWorldPosition();
+// AABBを取得
+AABB GetAABB();
+//衝突応答
+void OnCollision(const Player* player);
 
 private:
 	// マップチップによるフィールド
@@ -61,5 +71,8 @@ private:
 	Model* model_ = nullptr;
 	// ワールド変換データ
 	WorldTransform worldTransform_;
+	// 敵の当たり判定サイズ
+	static inline const float kWidth = 1.8f;
+	static inline const float kHeight = 1.8f;
 
 };

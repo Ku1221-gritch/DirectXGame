@@ -20,8 +20,14 @@ GameScene::~GameScene() {
 		}
 	}
 	worldTransformBlocks_.clear();
+
+	for (Enemy *enemy : enemies_) {
+		delete enemy;
+	}
+	enemies_.clear();
 }
 
+//初期化
 void GameScene::Initialize() {
 
 	dxCommon_ = DirectXCommon::GetInstance();
@@ -52,7 +58,16 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	//敵キャラの生成
 	modelEnemy_ = Model::CreateFromOBJ("Enemy", true);
-	enemy_ = new Enemy();
+
+	for (int32_t i = 0; i < 5; ++i) {
+		Enemy* newEnemy = new Enemy();
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(6*i, 18);
+		newEnemy->Initialize(modelEnemy_, &viewProjection_, enemyPosition);
+
+		enemies_.push_back(newEnemy);
+		newEnemy->SetMapChipField(mapChipField_);
+	}
+
 	//座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(12, 18);
@@ -60,8 +75,8 @@ void GameScene::Initialize() {
 	player_->Initialize(modelPlayer_, &viewProjection_, playerPosition);
 	player_->SetMapChipField(mapChipField_);
 	//敵キャラの初期化
-	enemy_->Initialize(modelEnemy_, &viewProjection_, enemyPosition);
-	enemy_->SetMapChipField(mapChipField_);
+	//enemy_->SetMapChipField(mapChipField_);
+	//enemy_->Initialize(modelEnemy_, &viewProjection_, enemyPosition);
 	// ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
 	debugCamera_ = new DebugCamera(1280, 720);
@@ -99,7 +114,11 @@ void GameScene::Update() {
 	// 自キャラの更新
 	player_->Update();
 	//敵キャラの更新
-	enemy_->Update();
+	for (Enemy* enemy : enemies_) {
+		enemy->Update();
+	}
+	CheckAllCollisions();
+
 	////スプライトの今の座標を取得
 	// Vector2 position = sprite_->GetPosition();
 	////座標を｛2，1｝移動
@@ -197,7 +216,9 @@ void GameScene::Draw() {
 
 	skydome_->Draw(&viewProjection_);
 	player_->Draw();
-	enemy_->Draw();
+	for (Enemy* enemy : enemies_) {
+		enemy->Draw();
+	}
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
@@ -238,4 +259,42 @@ void GameScene::GenerateBlocks() {
 			}
 		}
 	}
+}
+
+void GameScene::CheckAllCollisions() {
+#pragma region 自キャラと敵キャラの当たり判定
+	{
+		//判定対象1と2の座標
+		AABB aabb1, aabb2;
+
+		//自キャラの座標
+		aabb1 = player_->GetAABB();
+
+		//自キャラと敵全ての当たり判定
+		for (Enemy* enemy : enemies_) {
+			//敵の座標
+			aabb2 = enemy->GetAABB();
+
+			//AABB同士の交差判定
+			if (IsCollision(aabb1, aabb2)) {
+				//自キャラの衝突時コールバックを呼び出す
+				player_->OnCollision(enemy);
+				//敵の衝突時コールバックを呼び出す
+				enemy->OnCollision(player_);
+			}
+		}
+	}
+#pragma endregion 
+}
+
+// AABB同士の交差判定
+bool GameScene::IsCollision(const AABB& aabb1,const AABB& aabb2) {
+	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) &&
+		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) &&
+		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)) {
+
+		return true;
+	}
+	return false;
+
 }

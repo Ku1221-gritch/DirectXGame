@@ -3,31 +3,10 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "Model.h"
+#include "struct.h"
 
 class MapChipField;
-
-// マップとの当たり判定情報
-struct CollisionMapInfo 
-{
-	// 天井衝突フラグ
-	bool onCeiling_ = false;
-	// 着地フラグ
-	bool onLanding_ = false;
-	// 壁接触フラグ
-	bool onWallcontact = false;
-	Vector3 movement_;
-};
-
-// 角
-enum Corner
-{
-	kRightBottom, // 右下
-	kLeftBottom,  // 左下
-	kRightTop,    // 右上
-	kLeftTop,     // 左上
-
-	kNumCorner // 要素数
-};
+class Enemy;
 
 class Player
 {
@@ -87,6 +66,15 @@ public:
 
 	//接地状態の切り替え処理
 	void GroundingStateSwitching(const CollisionMapInfo& info);
+
+	// ワールド座標を取得
+	Vector3 GetWorldPosition();
+
+	// AABBを取得
+	AABB GetAABB();
+
+	//衝突判定
+	void OnCollision(const Enemy* enemy);
 
 	private:
 		//マップチップによるフィールド
