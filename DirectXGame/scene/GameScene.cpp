@@ -13,6 +13,8 @@ GameScene::~GameScene() {
 	delete modelSkydome_;
 	delete debugCamera_;
 	delete modelPlayer_;
+	delete deathParticles_;
+	delete modelDeathParticle_;
 	delete mapChipField_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
@@ -33,29 +35,35 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
+
+	//音声
 	// textureHandle_ = TextureManager::Load("sample.png");
 	// soundDataHandle_ = audio_->LoadWave("mokugyo.wav");
 	// audio_->PlayWave(soundDataHandle_);
 	// voiceHandle_ = audio_->PlayWave(soundDataHandle_, true);
 	// sprite_ = Sprite::Create(textureHandle_, {100, 50});
+	
 	//ブロック
 	modelBlock_ = Model::Create();
 	worldTransform_.Initialize();
 	viewProjection_.Initialize();
+
 	//スカイドーム
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_);
+
 	//マップチップフィールド
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	GenerateBlocks();
+
 	//ビュープロジェクションの初期化
 	viewProjection_.farZ = 200;
 	viewProjection_.Initialize();
-	// 自キャラの生成
-	modelPlayer_ = Model::CreateFromOBJ("player2", true);
-	player_ = new Player();
+
+
+
 	//敵キャラの生成
 	modelEnemy_ = Model::CreateFromOBJ("Enemy", true);
 
@@ -71,9 +79,22 @@ void GameScene::Initialize() {
 	//座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(12, 18);
+
+	// 自キャラの生成
+	modelPlayer_ = Model::CreateFromOBJ("player2", true);
+	player_ = new Player();
+
 	// 自キャラの初期化
 	player_->Initialize(modelPlayer_, &viewProjection_, playerPosition);
 	player_->SetMapChipField(mapChipField_);
+
+	// デスパーティクルの生成
+	modelDeathParticle_ = Model::CreateFromOBJ("deathparticles", true);
+
+	// 仮の生成処理。後で消す。
+	deathParticles_ = new DeathParticles;
+	deathParticles_->Initialize(modelDeathParticle_, &viewProjection_, playerPosition);
+
 	//敵キャラの初期化
 	//enemy_->SetMapChipField(mapChipField_);
 	//enemy_->Initialize(modelEnemy_, &viewProjection_, enemyPosition);
@@ -154,9 +175,13 @@ void GameScene::Update() {
 		}
 	}
 
+	//スカイドームの更新処理
 	skydome_->Update();
 
-
+	//デスパーティクルの更新処理
+	if (deathParticles_) {
+		deathParticles_->Update();
+	}
 
 	#endif // _DEBUG
 
@@ -214,12 +239,18 @@ void GameScene::Draw() {
 		}
 	}
 
+	//スカイドームの描画処理
 	skydome_->Draw(&viewProjection_);
+	//プレイヤーの描画処理
 	player_->Draw();
+	//敵の描画処理
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
-
+	//デスパーティクルの描画処理
+	if (deathParticles_) {
+		deathParticles_->Draw();
+	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion

@@ -14,6 +14,7 @@
 #include<vector>
 #include "Function.h"
 #include "MapChipField.h"
+#include"DeathParticles.h"
 #include "CameraController.h"
 
 /// <summary>
@@ -74,7 +75,9 @@ private: // メンバ変数
 	Model* modelEnemy_ = nullptr;
 	Enemy* enemy_ = nullptr;
 	std::list<Enemy*> enemies_;
-
+	//デスパーティクル
+	Model* modelDeathParticle_ = nullptr;
+	DeathParticles* deathParticles_ = nullptr;
 	//カメラコントローラー
 	CameraController* cameraController_ = nullptr;
 	//デバッグカメラ

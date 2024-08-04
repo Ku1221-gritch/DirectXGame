@@ -451,10 +451,11 @@ AABB Player::GetAABB() {
 	return aabb;
 }
 
+//プレイヤーと敵の当たった場合の処理
 void Player::OnCollision(const Enemy* enemy) { 
 	(void)enemy; 
 	//ジャンプ開始（仮処理）
-	velocity_ += Vector3(0,1.8f,0);
+	//velocity_ += Vector3(0,1.8f,0);
 }
 
 
