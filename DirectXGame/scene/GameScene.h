@@ -48,14 +48,19 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
-	void GenerateBlocks();
-
-	// 全ての当たり判定を行う
-	void CheckAllCollisions();
-	// AABB同士の交差判定
-	bool IsCollision(const AABB& aabb1, const AABB& aabb2);
+	//デスフラグのgetter
+	bool IsFinished() const { return finished_; };
 
 private: // メンバ変数
+	//ゲームのフェーズ（型）
+	enum class Phase {
+		kPlay,  // ゲームプレイ
+		kDeath, // デス演出
+	};
+
+	//ゲームの現在フェーズ（変数）
+	Phase phase_;
+
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
@@ -95,6 +100,15 @@ private: // メンバ変数
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 	// カメラ移動範囲
 	Rect movableArea_ = {};
+	void GenerateBlocks();
+	// 全ての当たり判定を行う
+	void CheckAllCollisions();
+	// AABB同士の交差判定
+	bool IsCollision(const AABB& aabb1, const AABB& aabb2);
+	//フェーズの切り替え
+	void ChangePhase();
+	//終了フラグ
+	bool finished_ = false;
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>

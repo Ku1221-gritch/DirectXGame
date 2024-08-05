@@ -21,7 +21,7 @@ void DeathParticles::Initialize(Model* model, ViewProjection* viewProjection, co
 
 void DeathParticles::Update() {
 	// 終了なら何もしない
-	if (isFinished) {
+	if (isFinished_) {
 		return;
 	}
 
@@ -32,7 +32,7 @@ void DeathParticles::Update() {
 	if (counter >= kDuration) {
 		counter = kDuration;
 		//終了扱いにする
-		isFinished = true;
+		isFinished_ = true;
 	}
 
 	for (uint32_t i = 0; i < worldTransforms.size(); ++i) {
@@ -61,7 +61,7 @@ void DeathParticles::Update() {
 
 void DeathParticles::Draw() {
 	//終了なら何もしない
-	if (isFinished) {
+	if (isFinished_) {
 		return;
 	}
 

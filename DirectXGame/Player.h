@@ -76,6 +76,9 @@ public:
 	//衝突判定
 	void OnCollision(const Enemy* enemy);
 
+	//デスフラグのgetter
+	bool IsDead() const { return isDead_; }
+
 	private:
 		//マップチップによるフィールド
 	    MapChipField* mapChipField_ = nullptr;
@@ -114,6 +117,9 @@ public:
 
 		//接地状態フラグ
 	    bool onGround_ = true;
+
+		//デスフラグ
+	    bool isDead_ = false;
 
 		//重力加速度（下方向）
 	    static inline const float kGravityAcceleration = 0.1f;

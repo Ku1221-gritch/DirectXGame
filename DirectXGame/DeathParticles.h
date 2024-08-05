@@ -14,6 +14,8 @@ public:
 
 	void Draw();
 
+	bool IsFinished() const { return isFinished_; };
+
 private:
 	//パーティクルの個数
 	static inline const uint32_t kNumParticles = 8;
@@ -33,7 +35,7 @@ private:
 	ViewProjection* viewProjection_ = nullptr;
 
 	//終了フラグ
-	bool isFinished = false;
+	bool isFinished_ = false;
 	//経過時間カウント
 	float counter = 0.0f;
 
